@@ -635,3 +635,13 @@ a { text-underline-offset: .2em; }
   .opts span { width: 100%; }
   .opts label { flex: 1 1 100%; }
 }
+
+/* ---------- Glosario de palabras del caso (agregado 2026-11-16) ---------- */
+.gloss { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 12px; margin: 14px 0 22px; }
+.gloss-item { margin: 0; background: #f7f3e8; color: var(--ink); padding: 10px 8px 8px; text-align: center; box-shadow: var(--shadow-sm); border-radius: 2px; }
+.gloss-item svg { width: 54px; height: 54px; fill: none; stroke: var(--ink); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; }
+.gloss-item figcaption { font: 700 13px var(--mono); letter-spacing: .04em; margin-top: 4px; }
+.gloss.compact { grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; margin: 0 0 18px; }
+.gloss.compact .gloss-item { padding: 6px 6px 5px; box-shadow: 0 2px 6px rgba(0,0,0,.18); }
+.gloss.compact svg { width: 36px; height: 36px; }
+.gloss.compact figcaption { font-size: 11.5px; }

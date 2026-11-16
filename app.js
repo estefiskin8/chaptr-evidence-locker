@@ -103,6 +103,25 @@
   }
   if ('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
 
+
+  // ---------- Glosario con dibujos (trazo de tinta, sin spoilers) ----------
+  const ICONS = {
+    prototype: '<rect x="18" y="14" width="28" height="38" rx="7"/><circle cx="32" cy="30" r="7"/><line x1="26" y1="44" x2="38" y2="44"/>',
+    base: '<ellipse cx="32" cy="38" rx="22" ry="9"/><ellipse cx="32" cy="35" rx="13" ry="5"/><line x1="54" y1="38" x2="60" y2="30"/>',
+    case: '<rect x="12" y="20" width="40" height="28" rx="4"/><path d="M25 20v-6h14v6"/><circle cx="20" cy="52" r="3"/><circle cx="44" cy="52" r="3"/>',
+    card: '<rect x="10" y="18" width="44" height="28" rx="3"/><rect x="15" y="24" width="10" height="12"/><line x1="30" y1="28" x2="48" y2="28"/><line x1="30" y1="35" x2="44" y2="35"/>',
+    meeting: '<rect x="14" y="26" width="36" height="12" rx="2"/><circle cx="20" cy="18" r="4"/><circle cx="32" cy="18" r="4"/><circle cx="44" cy="18" r="4"/><line x1="20" y1="38" x2="20" y2="50"/><line x1="44" y1="38" x2="44" y2="50"/>',
+    storage: '<rect x="12" y="10" width="40" height="44"/><line x1="12" y1="25" x2="52" y2="25"/><line x1="12" y1="40" x2="52" y2="40"/><rect x="17" y="15" width="10" height="10"/><rect x="33" y="30" width="12" height="10"/><rect x="19" y="44" width="14" height="10"/>',
+    wheels: '<path d="M8 44 C22 40, 34 30, 56 26" stroke-dasharray="4 4"/><path d="M8 52 C22 48, 34 38, 56 34" stroke-dasharray="4 4"/>',
+    fiber: '<path d="M10 40 C18 20, 26 50, 34 30 S48 22, 54 34" style="stroke:#9c3d26"/>',
+  };
+  function glossary(compact) {
+    if (!C.glossary) return '';
+    return `<div class="gloss ${compact ? 'compact' : ''}" aria-label="Case words">
+      ${C.glossary.map(g => `<figure class="gloss-item"><svg viewBox="0 0 64 64" aria-hidden="true">${ICONS[g.icon] || ''}</svg><figcaption>${esc(g.word)}</figcaption></figure>`).join('')}
+    </div>`;
+  }
+
   // ---------- Vistas ----------
   function render() {
     stopAudio();
@@ -159,6 +178,8 @@
             <figcaption class="cap"><b>${esc(s.name)}</b>${esc(s.role)}</figcaption>
           </figure>`).join('')}
       </div>
+      <p class="dymo" style="margin-top:28px">Case words</p>
+      ${glossary(false)}
       <div class="row" style="justify-content:center;margin-top:30px">
         <button class="btn primary" data-go="inspect">Inspect the studio</button>
       </div>
@@ -243,6 +264,7 @@
     return `
       <h2>Your evidence</h2>
       <p class="lead">Read. Choose <b>two key facts</b> (tap a card). Say them. Do not show your screen.</p>
+      ${glossary(true)}
       <div class="ev-grid">
         ${ids.map(evidenceCard).join('')}
         ${locked.map(b => `<div class="locked-env"><div><b>SEALED ENVELOPE</b><p class="typed" style="margin:8px 0 0">Opens after ${b.after} questions in the interrogation room.</p></div></div>`).join('')}
@@ -284,7 +306,8 @@
   function endingsFor(suspectId) {
     const own = suspectById[suspectId].qa.map(q => q.q[2]);
     const others = allQA.filter(q => q.suspect.id !== suspectId).map(q => q.q[2]);
-    const decoys = [others[(suspectId.length * 3) % others.length], others[(suspectId.length * 5 + 2) % others.length]];
+    const nDecoys = C.decoysPerSuspect ?? 2;
+    const decoys = [others[(suspectId.length * 3) % others.length], others[(suspectId.length * 5 + 2) % others.length]].slice(0, nDecoys);
     const list = [...new Set([...own, ...decoys])];
     // orden estable pero mezclado
     return list.map((v, i) => [v, (i * 7 + suspectId.length) % list.length]).sort((a, b) => a[1] - b[1]).map(x => x[0]);
@@ -305,6 +328,7 @@
     return `
       <h2>Interrogation room</h2>
       <p class="lead">Build the question → say it aloud → listen → write Yes / No and one new fact. <b>One answer is not true.</b></p>
+      ${glossary(true)}
       <div class="tapes" aria-label="${tapesLeft()} questions left">${Array.from({ length: C.questionBudget }, (_, i) => `<span class="tape-ic ${i < askedCount() ? 'used' : ''}"></span>`).join('')}<span class="small" style="margin-left:8px">${tapesLeft()} tapes left</span></div>
       <div class="room">
         <div class="who">
