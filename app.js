@@ -377,7 +377,10 @@
   }
 
   function proofOptions() {
-    const ev = visibleEvidence().map(id => [id, `${id} · ${C.evidence[id].title}`]);
+    // En grupo, después de los tríos de expertos todos escucharon la evidencia de los otros
+    // equipos: el veredicto ofrece todas las evidencias (solo el título). En solo, lo abierto.
+    const pool = C.teams[team] && C.teams[team].batches ? visibleEvidence() : Object.keys(C.evidence);
+    const ev = pool.map(id => [id, `${id} · ${C.evidence[id].title}`]);
     const tapes = S.asked.filter(a => a.yn !== null).map(a => [a.id, `Tape · ${qaById[a.id].suspect.name.split(' ')[0]}: "${qaById[a.id].a.split('.')[0]}."`]);
     return [...ev, ...tapes];
   }
